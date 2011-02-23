@@ -283,7 +283,12 @@ module AWS
                           "Version" => api_version,
                           "Timestamp"=>Time.now.getutc.iso8601} )
 
-          sig = get_aws_auth_param(params, @secret_access_key, @server)
+          # build server string for signature.
+          server_str = @server.dup
+          if (@use_ssl && @port.to_i != 443) || (!@use_ssl && @port.to_i != 80)
+            server_str += ":#{@port}"
+          end
+          sig = get_aws_auth_param(params, @secret_access_key, server_str)
 
           query = params.sort.collect do |param|
             CGI::escape(param[0]) + "=" + CGI::escape(param[1])
